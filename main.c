@@ -13,10 +13,6 @@
 #include "define.h"
 
 int main(int argc, char *argv[]){
-	if(argc != 2){
-		fprintf(stderr,"usage: ./DBUX MODE(0,1,2)\n");
-		exit(1);
-	}
 	printf("+-----DBUX ver 1.0----------------------------------------+\n");
 	printf("| __/ Compile date : %s                      __/ | \n",__DATE__);
 	printf("| __/         time : %s                         __/ | \n",__TIME__);
@@ -25,15 +21,14 @@ int main(int argc, char *argv[]){
 	printf("+---------------------------------------------------------+\n");
 
 	/*variable definition and memory allocation*/
-  int count=0,MODE=0;
-	char date_listname[]="../input/datelist.txt";
-	char s_listname[]="../input/spatial_binlist.txt";
-	char t_listname[]="../input/temporal_binlist.txt";
-	short *t_input[SAMPLESIZE],*s_input[SAMPLESIZE];
-	sscanf(argv[1],"%d",&MODE);
+  int count=0;
+	char pred_listname[]="../input/predlist.txt";
+	char s_listname[]="../input/spatial_pairlist.txt";
+	char t_listname[]="../input/temporal_pairlist.txt";
+	short *t_pair[PAIRSIZE],*s_pair[PAIRSIZE];
 
-	for(count=0;count<SAMPLESIZE;count++){
-		if((t_input[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(s_input[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+	for(count=0;count<PAIRSIZE;count++){
+		if((t_pair[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(s_pair[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
 			fprintf(stderr,"main: can't allocate memory\n");
 			exit(1);
 		}
@@ -55,20 +50,19 @@ int main(int argc, char *argv[]){
 
 	/*load input datasets*/
 	printf("input data loading...\n");
-	if(ReadST(s_listname, t_listname, t_input, s_input)!=0){
+	if(ReadST(s_listname, t_listname, t_pair, s_pair)!=0){
 		fprintf(stderr,"main: ReadST error!\n");
 		exit(1);
 	}
 	printf("input data loaded! execute DBUX...\n");
-	if(MODE==0){
-		if(ExecDBUX(date_listname, t_input, s_input)!=0){
-			fprintf(stderr,"main: ExecDBUX error!\n");
-			exit(1);
-		}
+	if(ExecDBUX(pred_listname, t_pair, s_pair)!=0){
+		fprintf(stderr,"main: ExecDBUX error!\n");
+		exit(1);
 	}
-	for(count=0;count<SAMPLESIZE;count++){
-		free(t_input[count]);
-		free(s_input[count]);
+
+	for(count=0;count<PAIRSIZE;count++){
+		free(t_pair[count]);
+		free(s_pair[count]);
 	}
 	return 0;
 }
