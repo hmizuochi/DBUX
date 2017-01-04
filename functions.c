@@ -94,7 +94,7 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
   if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave)!=0){
     fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
     exit(1);
-  } //input:tmin_input,t_input,s_input,lookup_ave,snum_ave    output:None,    generate predected maps.
+  } //input:date_listname,tmin_input,lookup_ave,snum_ave    output:None,    generate predected maps.
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
     free(lookup[LEVEL]);
     free(lookup_ave[LEVEL]);
@@ -314,6 +314,7 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
     fclose(fp2);
     if((fp2=fopen(t_filename,"rb"))==NULL){
       fprintf(stderr,"PredDBUX Warning: can't open %s, continue with nullmap\n",t_filename);
+      t_input=nullmap;
     }else{
       if((fread(t_input,sizeof(short),COL*ROW,fp2)) != (unsigned int)(COL*ROW)){
         fprintf(stderr,"PredDBUX: can't read t file\n");

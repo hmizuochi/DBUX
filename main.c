@@ -1,11 +1,3 @@
-/*	compile: gcc 20150113_DU1.c -o 20150113_DU1
-	usage: ./20150113_DU1 "LEVEL" "X(image columns)" "Y(image rows)" "MAXVALUE(Int16)" "MINVALUE(Int16)" "STEP(Int16)"
-	ex) for gap-filled MODIS and landsat, LEVEL:0~30(MNDWI -0.50~1.00), use for loop in command line.
-	confirm corrent directory has spatial-base&temporal-base binary files and lists of their filenames (spatial_binlist.txt & temporal_binlist.txt).
-	confirm output binary file list (lookup_output_binlist.txt) and enough HDD capacity.
-	image data format: Bytes=Int16, null=-20000. range=-10000~10000.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -54,12 +46,13 @@ int main(int argc, char *argv[]){
 		fprintf(stderr,"main: ReadST error!\n");
 		exit(1);
 	}
+	/*execute DBUX*/
 	printf("input data loaded! execute DBUX...\n");
 	if(ExecDBUX(pred_listname, t_pair, s_pair)!=0){
 		fprintf(stderr,"main: ExecDBUX error!\n");
 		exit(1);
 	}
-
+	/*memory release*/
 	for(count=0;count<PAIRSIZE;count++){
 		free(t_pair[count]);
 		free(s_pair[count]);
