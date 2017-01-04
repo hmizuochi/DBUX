@@ -1,7 +1,14 @@
 This is a stable program of Database Unmixing, which is LUT-based data fusion algorithm.
-Developed by Mizuochi, H. (See Mizuochi et al., 2014; Mizuochi et al., 2017)
+Developed by Mizuochi, H.
 
-Sub-directories: src, input, output
+References:
+
+Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sens. 6(8), pp. 7660-7682.
+
+Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sens. Environ. Submitted.
+
+
+Sub-directories: src, input, output, sample_data
 
 Compile:
 
@@ -52,4 +59,5 @@ Execute:
 lookup maps, reliability maps, predicted maps will be written under output directory.
 
 predicted maps: "spatial_YYYYDOY_comp.raw"
+
 reliability maps: "spatial_YYYYDOY_rel.raw"
