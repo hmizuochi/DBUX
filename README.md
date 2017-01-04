@@ -7,20 +7,21 @@ Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the su
 
 Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sens. Environ. Submitted.
 
+Extract: $ tar zxvf DBUX.tar.gz
 
 Sub-directories: src, input, output, sample_data
 
-Compile:
+Before running program, the following preparation is required.
+
+A) Edit parameters in "src/define.h".
+
+B) Compile program.
 
 	$cd src
 
 	$make #require gcc
 
-Before running program, the following preparation is required.
-
-A) Edit parameters in "define.h".
-
-B) put the following input maps and text files under input directory.
+C) put the following input maps and text files under input directory.
 
 	1) temporally frequent maps ("T maps") and spatially fine maps ("S maps").
 		 data format is 2 bytes Integer. filename format is:
@@ -58,6 +59,8 @@ Execute:
 
 lookup maps, reliability maps, predicted maps will be written under output directory.
 
-predicted maps: "spatial_YYYYDOY_comp.raw"
+predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_rel.raw"
 
-reliability maps: "spatial_YYYYDOY_rel.raw"
+sample_data includes 9 Smaps and 366 Tmaps (i.e. 9 match-up pairs are available).
+Smap is modified normalized water index (MNDWI) derived from Landsat TM and ETM+, and Tmap is that derived from MODIS, with scalefactor = 10000.
+For accurate prediction, more match-up pairs are desirable.

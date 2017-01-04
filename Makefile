@@ -5,7 +5,7 @@ CFLAG = -g
 all: DBUX #default setting when use solely "make"
 
 DBUX: main.o functions.o define.h #setting when use "make DBUX"
-	$(CC) -o DBUX main.o functions.o
+	$(CC) -o DBUX.exe main.o functions.o
 
 clean: #setting when use "make clean"
 	rm -f *.o

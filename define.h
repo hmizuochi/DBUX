@@ -3,8 +3,8 @@
 #define TNRANGE -10000 //potentially minimum value of temporally frequent maps.
 #define SPRANGE 10000 //potentially maximum value of spatially fine maps ("S maps").
 #define SNRANGE -10000 //potentially minumum value of spatially fine maps.
-#define PAIRSIZE 5113 //the number of match-up pairs.
-#define PREDSIZE 5113 //the number of dates in which DBUX will make prediction.
+#define PAIRSIZE 9 //the number of match-up pairs.
+#define PREDSIZE 366 //the number of dates in which DBUX will make prediction.
 #define COL 180 //columns of a map. must be common between T maps and S maps.
 #define ROW 180 //rows of a map must be common between T maps and S maps.
 #define MAXTEXT 256 //maximum text buffer

@@ -275,21 +275,16 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
 	FILE *fp,*fp2;
 	int i=0,count=0,LEVEL=0;
 	char date[MAXTEXT],s_filename[MAXTEXT],t_filename[MAXTEXT],output_filename[MAXTEXT];
-	short *t_input, *s_input, *s_output, *nullmap;
+	short *t_input, *s_input, *s_output;
 	int *image,*snum_output;
 
-  if(((nullmap=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||((t_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||
+  if(((t_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||
   ((s_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||((s_output=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||
   ((image=(int*)malloc(COL*ROW*sizeof(int)))==NULL)||((snum_output=(int*)malloc(COL*ROW*sizeof(int)))==NULL)){
     fprintf(stderr,"PredDBUX: can't allocate memory\n");
     exit(1);
   }
-  //prepare nullmap in case input s or t is unavailable.
-  for(i=0;i<COL*ROW;i++){
-    nullmap[i]=NVALUE;
-    s_input[i]=NVALUE;
-    t_input[i]=NVALUE;
-  }
+  //read prediction date.
 	if((fp=fopen(date_listname,"r"))==NULL){
     fprintf(stderr,"PredDBUX: %s was not opened successfully\n",date_listname);
     exit(1);
@@ -301,27 +296,29 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
     }
 		strtok(date,"\n\0");
 		printf("calculation date is %s\n",date);
-    snprintf(s_filename,MAXTEXT,"spatial_%s.raw",date);
-    snprintf(t_filename,MAXTEXT,"temporal_%s.raw",date);
+    snprintf(s_filename,MAXTEXT,"../input/spatial_%s.raw",date);
+    snprintf(t_filename,MAXTEXT,"../input/temporal_%s.raw",date);
     if((fp2=fopen(s_filename,"rb"))==NULL){
-      s_input=nullmap;
+      for(i=0;i<COL*ROW;i++)
+        s_input[i]=NVALUE;
     }else{
       if((fread(s_input,sizeof(short),COL*ROW,fp2)) != (unsigned int)(COL*ROW)){
         fprintf(stderr,"PredDBUX: can't read s file\n");
         exit(1);
       }
+      fclose(fp2);
     }
-    fclose(fp2);
     if((fp2=fopen(t_filename,"rb"))==NULL){
       fprintf(stderr,"PredDBUX Warning: can't open %s, continue with nullmap\n",t_filename);
-      t_input=nullmap;
+      for(i=0;i<COL*ROW;i++)
+        t_input[i]=NVALUE;
     }else{
       if((fread(t_input,sizeof(short),COL*ROW,fp2)) != (unsigned int)(COL*ROW)){
         fprintf(stderr,"PredDBUX: can't read t file\n");
         exit(1);
       }
+      fclose(fp2);
     }
-    fclose(fp2);
 		/* image initialize */
 		for(i=0;i<COL*ROW;i++){
 			image[i]=NVALUE;
@@ -397,7 +394,6 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
   fclose(fp);
   free(snum_output);
   free(image);
-  free(nullmap);
   free(t_input);
   free(s_input);
   free(s_output);
