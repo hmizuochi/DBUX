@@ -2,14 +2,19 @@ This is a stable program of Database Unmixing, which is LUT-based data fusion al
 Developed by Mizuochi, H. (See Mizuochi et al., 2014; Mizuochi et al., 2017)
 
 Sub-directories: src, input, output
+
 Compile:
+
 	$cd src
+
 	$make #require gcc
 
 Before running program, the following preparation is required.
+
 A) Edit parameters in "define.h".
 
 B) put the following input maps and text files under input directory.
+
 	1) temporally frequent maps ("T maps") and spatially fine maps ("S maps").
 		 data format is 2 bytes Integer. filename format is:
 		 "spatial_YYYYDOY.raw", "temporal_YYYYDOY.raw"
