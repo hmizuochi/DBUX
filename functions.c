@@ -44,8 +44,8 @@ int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input)
   	fclose(fp2);
   	count++;
   }
-  if(count!=SAMPLESIZE){
-  	fprintf(stderr,"ReadST Warning: SAMPLESIZE and read files were not consistent\n");
+  if(count!=PAIRSIZE){
+  	fprintf(stderr,"ReadST Warning: PAIRSIZE and the number of read files were not consistent\n");
   }
   return 0;
 }
@@ -71,8 +71,8 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     fprintf(stderr,"ExecDBUX: can't allocate memory\n");
     exit(1);
   }
-  if((fp=fopen("../input/tmin.bin","rb"))==NULL){
-		fprintf(stderr,"ExecDBUX: %s was not opened successfully\n","tmin.bin");
+  if((fp=fopen("../input/tmin.raw","rb"))==NULL){
+		fprintf(stderr,"ExecDBUX: %s was not opened successfully\n","tmin.raw");
     exit(1);
 	}
 	if((fread(tmin_input,sizeof(short),COL*ROW,fp)) != (unsigned int)(COL*ROW)){
@@ -85,13 +85,13 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     fprintf(stderr,"ExecDBUX: GenLUT error!\n");
     exit(1);
   } //input:tmin_input,t_input,s_input    output:lookup,snum    generate lookup maps.
-  printf("LUT generated! applying moving average with size%d...\n",MWSIZE);
+  printf("LUT generated! applying moving average with size %d...\n",MWSIZE);
   if(AveLUT(lookup, snum, lookup_ave, snum_ave)!=0){
     fprintf(stderr,"ExecDBUX: AveLUT error!\n");
     exit(1);
   } //input:lookup,snum   output:lookup_ave,snum_ave    generate averaged lookup maps.
   printf("do prediction...\n");
-  if(PredDBUX(date_listname, tmin_input, t_input, s_input, lookup_ave, snum_ave)!=0){
+  if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave)!=0){
     fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
     exit(1);
   } //input:tmin_input,t_input,s_input,lookup_ave,snum_ave    output:None,    generate predected maps.
@@ -126,7 +126,7 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
     	lookup[LEVEL][i]=0;
 	  }
   }
-  for(count=0;count<SAMPLESIZE;count++){
+  for(count=0;count<PAIRSIZE;count++){
     for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
       for(i=0;i<COL*ROW;i++){
         s_image[i]=NVALUE;
@@ -169,7 +169,7 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
   }
   /*output lookup maps.*/
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
-    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d.bin",LEVEL);
+    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d.raw",LEVEL);
     for(i=0;i<COL*ROW;i++){
       lookup_output[LEVEL][i]=(short)lookup[LEVEL][i];
     }
@@ -182,7 +182,7 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
       exit(1);
     }
     fclose(fp);
-    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d_snum.bin",LEVEL);
+    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d_rel.bin",LEVEL);
     if((fp=fopen(lookup_output_filename,"wb"))==NULL){
       fprintf(stderr,"GenLUT: can't open output file\n");
       exit(1);
@@ -244,7 +244,7 @@ int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, shor
 		}
   }
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
-	  snprintf(output_lookup_filename,MAXTEXT,"../output/LOOKUP%d_ave.bin",LEVEL);
+	  snprintf(output_lookup_filename,MAXTEXT,"../output/LOOKUP%d_ave.raw",LEVEL);
     for(i=0;i<COL*ROW;i++){
       lookup_output[LEVEL][i]=(short)lookup[LEVEL][i];
     }
@@ -257,7 +257,7 @@ int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, shor
       exit(1);
 	  }
 	  fclose(fp);
-	  snprintf(output_snum_filename,MAXTEXT,"../output/LOOKUP%d_ave_snum.bin",LEVEL);
+	  snprintf(output_snum_filename,MAXTEXT,"../output/LOOKUP%d_ave_rel.raw",LEVEL);
     if((fp=fopen(output_snum_filename,"wb"))==NULL){
       fprintf(stderr,"AveLUT: can't open output file\n");
       exit(1);
@@ -271,30 +271,56 @@ int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, shor
   return 0;
 }
 
-int PredDBUX(char *date_listname, short *tmin_input, short **t_input, short **s_input, short **lookup, short **snum){
+int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snum){
 	FILE *fp,*fp2;
 	int i=0,count=0,LEVEL=0;
-	char date[256],output_filename[256];
-
-	short *s_output;
+	char date[MAXTEXT],s_filename[MAXTEXT],t_filename[MAXTEXT],output_filename[MAXTEXT];
+	short *t_input, *s_input, *s_output, *nullmap;
 	int *image,*snum_output;
 
-  if(((s_output=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||((image=(int*)malloc(COL*ROW*sizeof(int)))==NULL)||((snum_output=(int*)malloc(COL*ROW*sizeof(int)))==NULL)){
+  if(((nullmap=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||((t_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||
+  ((s_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||((s_output=(short*)malloc(COL*ROW*sizeof(short)))==NULL)||
+  ((image=(int*)malloc(COL*ROW*sizeof(int)))==NULL)||((snum_output=(int*)malloc(COL*ROW*sizeof(int)))==NULL)){
     fprintf(stderr,"PredDBUX: can't allocate memory\n");
     exit(1);
   }
-	//input the date.
+  //prepare nullmap in case input s or t is unavailable.
+  for(i=0;i<COL*ROW;i++){
+    nullmap[i]=NVALUE;
+    s_input[i]=NVALUE;
+    t_input[i]=NVALUE;
+  }
 	if((fp=fopen(date_listname,"r"))==NULL){
     fprintf(stderr,"PredDBUX: %s was not opened successfully\n",date_listname);
     exit(1);
   }
-  for(count=0;count<SAMPLESIZE;count++){
+  //loop for each prediction date.
+  for(count=0;count<PREDSIZE;count++){
 	  if(fgets(date,sizeof(date),fp)==NULL){
       fprintf(stderr,"PredDBUX Warning: datelist EOF\n");
     }
 		strtok(date,"\n\0");
 		printf("calculation date is %s\n",date);
-
+    snprintf(s_filename,MAXTEXT,"spatial_%s.raw",date);
+    snprintf(t_filename,MAXTEXT,"temporal_%s.raw",date);
+    if((fp2=fopen(s_filename,"rb"))==NULL){
+      s_input=nullmap;
+    }else{
+      if((fread(s_input,sizeof(short),COL*ROW,fp2)) != (unsigned int)(COL*ROW)){
+        fprintf(stderr,"PredDBUX: can't read s file\n");
+        exit(1);
+      }
+    }
+    fclose(fp2);
+    if((fp2=fopen(t_filename,"rb"))==NULL){
+      fprintf(stderr,"PredDBUX Warning: can't open %s, continue with nullmap\n",t_filename);
+    }else{
+      if((fread(t_input,sizeof(short),COL*ROW,fp2)) != (unsigned int)(COL*ROW)){
+        fprintf(stderr,"PredDBUX: can't read t file\n");
+        exit(1);
+      }
+    }
+    fclose(fp2);
 		/* image initialize */
 		for(i=0;i<COL*ROW;i++){
 			image[i]=NVALUE;
@@ -303,25 +329,25 @@ int PredDBUX(char *date_listname, short *tmin_input, short **t_input, short **s_
 		}
 		/* make gap-filled map. */
 		for(i=0;i<COL*ROW;i++){
-			if((t_input[count][i]<TNRANGE)||(t_input[count][i]>TPRANGE)){
-				image[i]=s_input[count][i]; //no temporal-base map.
+			if((t_input[i]<TNRANGE)||(t_input[i]>TPRANGE)){
+				image[i]=s_input[i]; //no temporal-base map.
 				snum_output[i]=-88;
 			}else{
-				if((s_input[count][i]<SNRANGE)||(s_input[count][i]>SPRANGE)){
+				if((s_input[i]<SNRANGE)||(s_input[i]>SPRANGE)){
 					//exist temporal-base map, no spatial-base map -> gap-filling
 					for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
         		if(LEVEL==0){
-						  if((TNRANGE<=t_input[count][i])&&(t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP)){
+						  if((TNRANGE<=t_input[i])&&(t_input[i]<=tmin_input[i]+(LEVEL+1)*STEP)){
 								image[i]=lookup[LEVEL][i];
 								snum_output[i]=snum[LEVEL][i];
 							}
 						}else if(LEVEL==MAXLEVEL){
-							if((tmin_input[i]+STEP*LEVEL<t_input[count][i])&&(t_input[count][i]<=TPRANGE)){
+							if((tmin_input[i]+STEP*LEVEL<t_input[i])&&(t_input[i]<=TPRANGE)){
 								image[i]=lookup[LEVEL][i];
 								snum_output[i]=snum[LEVEL][i];
 							}
 						}else{
-							if((tmin_input[i]+STEP*LEVEL<t_input[count][i])&&(t_input[count][i]<=tmin_input[i]+STEP*(LEVEL+1))){
+							if((tmin_input[i]+STEP*LEVEL<t_input[i])&&(t_input[i]<=tmin_input[i]+STEP*(LEVEL+1))){
 								image[i]=lookup[LEVEL][i];
 								snum_output[i]=snum[LEVEL][i];
 							}
@@ -329,14 +355,14 @@ int PredDBUX(char *date_listname, short *tmin_input, short **t_input, short **s_
 					}
 				}else{
 					//exist temporal-base map, exist spatial-base map -> spatial-base map
-					image[i]=s_input[count][i];
+					image[i]=s_input[i];
 					snum_output[i]=-99;
 				}
 			}
 		}
 
 		//output gap-filled map.
-		snprintf(output_filename,MAXTEXT,"../output/spatial_%s_comp.bin",date);
+		snprintf(output_filename,MAXTEXT,"../output/spatial_%s_comp.raw",date);
 		for(i=0;i<COL*ROW;i++){
       s_output[i]=(short)image[i];
     }
@@ -351,7 +377,7 @@ int PredDBUX(char *date_listname, short *tmin_input, short **t_input, short **s_
 			printf("%s generated!\n",output_filename);
 		}
     fclose(fp2);
-    snprintf(output_filename,MAXTEXT,"../output/spatial_%s_snum.bin",date);
+    snprintf(output_filename,MAXTEXT,"../output/spatial_%s_rel.raw",date);
     for(i=0;i<COL*ROW;i++){
       s_output[i]=(short)snum_output[i];
     }
@@ -370,6 +396,9 @@ int PredDBUX(char *date_listname, short *tmin_input, short **t_input, short **s_
   fclose(fp);
   free(snum_output);
   free(image);
+  free(nullmap);
+  free(t_input);
+  free(s_input);
   free(s_output);
   return 0;
 }
