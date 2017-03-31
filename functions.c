@@ -4,6 +4,7 @@
 #include <string.h>
 #include "define.h"
 
+//read temporal maps and spatial maps by referring to "spatial_pairlist.txt" and "temporal_pairlist.txt".
 int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input){
   FILE *fp0,*fp1,*fp2;
   char buf[MAXTEXT],s_filename[MAXTEXT],t_filename[MAXTEXT];
@@ -50,6 +51,7 @@ int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input)
   return 0;
 }
 
+//execute DBUX with StatsCalc, GenLUT, AveLUT (if MWSIZE>=3), and PredDBUX.
 int ExecDBUX(char *date_listname, short **t_input, short **s_input){
   int i=0,LEVEL=0,MAXLEVEL=0;
   short *tmin_input, *tmax_input;
@@ -91,27 +93,28 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
 
   //if you use moving average of LUT, please remove the comment out "CO".
   //CO
-  printf("LUT generated! applying moving average with size %d...\n",MWSIZE);
-  if(AveLUT(lookup, snum, lookup_ave, snum_ave, MAXLEVEL)!=0){
-    fprintf(stderr,"ExecDBUX: AveLUT error!\n");
+  if(MWSIZE==1){
+    printf("LUT generated! No moving average.\n");
+    printf("do prediction...\n");
+    if(PredDBUX(date_listname, tmin_input, lookup, snum, MAXLEVEL)!=0){
+      fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
+      exit(1);
+    }
+  }else if(MWSIZE%2==0){
+    fprintf(stderr,"ExecDBUX: MWSIZE must be an odd number. \n");
     exit(1);
-  } //input:lookup,snum   output:lookup_ave,snum_ave    generate averaged lookup maps.
-  //CO
-
-  //if you do not use moving average of LUT, please remove the comment out "CO2".
-  //CO2
-  /*
-  printf("No moving average\n");
-  printf("do prediction...\n");
-  */
-  //CO2
-
-  //if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave, MAXLEVEL)!=0){
-  if(PredDBUX(date_listname, tmin_input, lookup, snum, MAXLEVEL)!=0){
-    fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
-    exit(1);
-  } //input:date_listname,tmin_input,lookup_ave,snum_ave    output:None,    generate predected maps.
-  //CO
+  }else{
+    printf("LUT generated! applying moving average with size %d...\n",MWSIZE);
+    if(AveLUT(lookup, snum, lookup_ave, snum_ave, MAXLEVEL)!=0){
+      fprintf(stderr,"ExecDBUX: AveLUT error!\n");
+      exit(1);
+    } //input:lookup,snum   output:lookup_ave,snum_ave    generate averaged lookup maps.
+    printf("do prediction...\n");
+    if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave, MAXLEVEL)!=0){
+      fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
+      exit(1);
+    } //input:date_listname,tmin_input,lookup_ave,snum_ave    output:None,    generate predected maps.
+  }
 
   /*LUT visualization.
   //if(VisualizeLUT(tmin_input,lookup_ave,MAXLEVEL)!=0){
@@ -120,6 +123,7 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     exit(1);
   }
   */
+
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
     free(lookup[LEVEL]);
     free(lookup_ave[LEVEL]);
@@ -432,6 +436,7 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
   return 0;
 }
 
+//this is under development and not used in above codes.
 int VisualizeLUT(short *tmin_input, short **lookup, int MAXLEVEL){
   FILE *fp;
   short t_input=TNRANGE;

@@ -1,35 +1,40 @@
-This is a stable program of Database Unmixing, which is LUT-based data fusion algorithm.
-Developed by Mizuochi, H.
+Description (ver. 1.0)
+======================
+This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C language. It has been tested in Linux system using gcc compiler.
+
+ver 1.0:
+- original version (first release)
+
+License:
+This program is provided free of charge, without restriction of use. For the full license information, see "LICENSE.txt". Publications, models and data products that make use of this program must include proper acknowledgement, including citing the journal article as in the following references.
 
 References:
 
-Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sens. 6(8), pp. 7660-7682.
+Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sensing. 6(8), pp. 7660-7682.
 
-Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sens. Environ. Submitted.
+Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sensing of Environment. Submitted.
 
-Extract: $ tar zxvf DBUX.tar.gz
 
-Sub-directories: src, input, output, sample_data
+Usage of this program
+=====================
+Extract: $ tar zxvf DBUX.tar.gz  
+Sub-directories: src, input, output, sample_data  
 
-Before running program, the following preparation is required.
-
+Before running program, the following preparation is required.  
 A) Edit parameters in "src/define.h".
+B) Compile program.  
+	$cd src  
+	$make #require gcc  
 
-B) Compile program.
+	if you revise define.h, please use  
+	$make clean; make
 
-	$cd src
+C) put the following input maps and text files under the input directory.
+	1) temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).  
+		 data format is 2 bytes Integer. filename must be:  
+		 "spatial_YYYYDOY.raw", "temporal_YYYYDOY.raw"; YYYYDOY is indicated by the following text files.
 
-	$make #require gcc
-
-C) put the following input maps and text files under input directory.
-
-	1) temporally frequent maps ("T maps") and spatially fine maps ("S maps").
-		 data format is 2 bytes Integer. filename format is:
-		 "spatial_YYYYDOY.raw", "temporal_YYYYDOY.raw"
-
-	2) map which indicates minimum value of T maps for each pixel - "tmin.raw"
-
-	3) namelist of S maps which are used for LUT generation - "spatial_pairlist.txt"
+	2) namelist of S maps which are used for LUT generation - "spatial_pairlist.txt"
 			e.g.
 			spatial_2002001.raw
 			spatial_2002002.raw
@@ -37,7 +42,7 @@ C) put the following input maps and text files under input directory.
 			spatial_2002007.raw
 			...
 
-	4) namelist of T maps which are used for LUT generation - "temporal_pairlist.txt".
+	3) namelist of T maps which are used for LUT generation - "temporal_pairlist.txt".  
 		 dates and order must be the same as spatial_pairlist.txt.
 			e.g.
 			temporal_2002001.raw
@@ -46,21 +51,24 @@ C) put the following input maps and text files under input directory.
 			temporal_2002007.raw
 			...
 
-	5) list of prediction dates in YYYYDOY format - "predlist.txt"
+	4) list of prediction dates - "predlist.txt"
 			e.g.
 			2002001
 			2002002
 			2002003
-			2002004
 			...
 
 Execute:
         $./DBUX
 
-lookup maps, reliability maps, predicted maps will be written under output directory.
+lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory.
 
 predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_rel.raw"
 
-sample_data includes 9 Smaps and 366 Tmaps (i.e. 9 match-up pairs are available).
+
+Sample data
+===========
+
+sample_data directory includes 9 Smaps and 366 Tmaps (i.e. 9 match-up pairs are available, and 366 prediction can be executable) over seasonal wetlands in north-central Namibia.
 Smap is modified normalized water index (MNDWI) derived from Landsat TM and ETM+, and Tmap is that derived from MODIS, with scalefactor = 10000.
 For accurate prediction, more match-up pairs are desirable.
