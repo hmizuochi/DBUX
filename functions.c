@@ -51,9 +51,25 @@ int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input)
 }
 
 int ExecDBUX(char *date_listname, short **t_input, short **s_input){
-  int i=0,LEVEL=0;
-  short *tmin_input, *lookup[MAXLEVEL+1], *lookup_ave[MAXLEVEL+1], *snum[MAXLEVEL+1], *snum_ave[MAXLEVEL+1];
-  FILE *fp;
+  int i=0,LEVEL=0,MAXLEVEL=0;
+  short *tmin_input, *tmax_input;
+  if((tmin_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(tmax_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+    fprintf(stderr,"ExecDBUX: can't allocate memory\n");
+    exit(1);
+  }
+  printf("DoStatistics...\n");
+  if(LIMITLEVEL>0){
+    StatsCalc(t_input,tmin_input,tmax_input);
+    MAXLEVEL=LIMITLEVEL;
+  }else if(LIMITLEVEL==0){
+    MAXLEVEL=StatsCalc(t_input,tmin_input,tmax_input);
+  }else{
+    fprintf(stderr,"ExecDBUX: LIMITLEVEL must not be negative value!\n");
+    exit(1);
+  }
+  printf("StatsCalc: MAXLEVEL=%d\n",MAXLEVEL);
+  short *lookup[MAXLEVEL+1], *lookup_ave[MAXLEVEL+1], *snum[MAXLEVEL+1], *snum_ave[MAXLEVEL+1];
+
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
 		if((lookup[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(lookup_ave[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||
     (snum[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(snum_ave[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
@@ -67,34 +83,43 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
       snum_ave[LEVEL][i]=0;
     }
 	}
-  if((tmin_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
-    fprintf(stderr,"ExecDBUX: can't allocate memory\n");
-    exit(1);
-  }
-  if((fp=fopen("../input/tmin.raw","rb"))==NULL){
-		fprintf(stderr,"ExecDBUX: %s was not opened successfully\n","tmin.raw");
-    exit(1);
-	}
-	if((fread(tmin_input,sizeof(short),COL*ROW,fp)) != (unsigned int)(COL*ROW)){
-		fprintf(stderr,"ExecDBUX: can't read tmin\n");
-    exit(1);
-	}
-	fclose(fp);
   printf("LUT generating...\n");
-  if(GenLUT(tmin_input, t_input, s_input, lookup, snum)!=0){
+  if(GenLUT(tmin_input, tmax_input, t_input, s_input, lookup, snum, MAXLEVEL)!=0){
     fprintf(stderr,"ExecDBUX: GenLUT error!\n");
     exit(1);
   } //input:tmin_input,t_input,s_input    output:lookup,snum    generate lookup maps.
+
+  //if you use moving average of LUT, please remove the comment out "CO".
+  //CO
   printf("LUT generated! applying moving average with size %d...\n",MWSIZE);
-  if(AveLUT(lookup, snum, lookup_ave, snum_ave)!=0){
+  if(AveLUT(lookup, snum, lookup_ave, snum_ave, MAXLEVEL)!=0){
     fprintf(stderr,"ExecDBUX: AveLUT error!\n");
     exit(1);
   } //input:lookup,snum   output:lookup_ave,snum_ave    generate averaged lookup maps.
+  //CO
+
+  //if you do not use moving average of LUT, please remove the comment out "CO2".
+  //CO2
+  /*
+  printf("No moving average\n");
   printf("do prediction...\n");
-  if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave)!=0){
+  */
+  //CO2
+
+  //if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave, MAXLEVEL)!=0){
+  if(PredDBUX(date_listname, tmin_input, lookup, snum, MAXLEVEL)!=0){
     fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
     exit(1);
   } //input:date_listname,tmin_input,lookup_ave,snum_ave    output:None,    generate predected maps.
+  //CO
+
+  /*LUT visualization.
+  //if(VisualizeLUT(tmin_input,lookup_ave,MAXLEVEL)!=0){
+  if(VisualizeLUT(tmin_input,lookup,MAXLEVEL)!=0){
+    fprintf(stderr,"ExecDBUX: VisualizeLUT error!\n");
+    exit(1);
+  }
+  */
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
     free(lookup[LEVEL]);
     free(lookup_ave[LEVEL]);
@@ -102,13 +127,14 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     free(snum_ave[LEVEL]);
   }
   free(tmin_input);
+  free(tmax_input);
   return 0;
 }
 
-int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_output, short **snum){
+int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_input, short **lookup_output, short **snum, int MAXLEVEL){
   short *s_image;
   int *lookup[MAXLEVEL+1];
-  int LEVEL=0,count=0,i=0;
+  int LEVEL=0,count=0,i=0,UPPERLEVEL=0;
   char lookup_output_filename[256];
   FILE *fp;
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
@@ -126,9 +152,11 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
     	lookup[LEVEL][i]=0;
 	  }
   }
-  for(count=0;count<PAIRSIZE;count++){
-    for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
-      for(i=0;i<COL*ROW;i++){
+
+  for(i=0;i<COL*ROW;i++){
+    UPPERLEVEL=(tmax_input[i]-tmin_input[i])/(STEP);
+    for(LEVEL=0;LEVEL<=UPPERLEVEL;LEVEL++){
+      for(count=0;count<PAIRSIZE;count++){
         s_image[i]=NVALUE;
         if(LEVEL==0){
           if((TNRANGE<=t_input[count][i])&&(t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP)){
@@ -136,7 +164,7 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
           }else{
             s_image[i]=NVALUE;
           }
-        }else if(LEVEL==MAXLEVEL){
+        }else if(LEVEL==UPPERLEVEL){
           if((tmin_input[i]+LEVEL*STEP<t_input[count][i])&&(t_input[count][i]<=TPRANGE)){
             s_image[i]=s_input[count][i];
           }else{
@@ -156,6 +184,10 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
         }
         lookup[LEVEL][i]=lookup[LEVEL][i]+s_image[i];
       }
+    }
+    for(LEVEL=UPPERLEVEL+1;LEVEL<=MAXLEVEL;LEVEL++){
+      lookup[LEVEL][i]=lookup[UPPERLEVEL][i];
+      snum[LEVEL][i]=snum[UPPERLEVEL][i];
     }
   }
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
@@ -200,7 +232,7 @@ int GenLUT(short *tmin_input, short **t_input, short **s_input, short **lookup_o
   return 0;
 }
 
-int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, short **snum_output){
+int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, short **snum_output, int MAXLEVEL){
   char output_lookup_filename[256],output_snum_filename[256];
   int *lookup[MAXLEVEL+1];
   int LEVEL=0,i=0,m=0,count=0;
@@ -271,7 +303,7 @@ int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, shor
   return 0;
 }
 
-int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snum){
+int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snum, int MAXLEVEL){
 	FILE *fp,*fp2;
 	int i=0,count=0,LEVEL=0;
 	char date[MAXTEXT],s_filename[MAXTEXT],t_filename[MAXTEXT],output_filename[MAXTEXT];
@@ -372,8 +404,8 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
       fprintf(stderr,"PredDBUX: can't write output file\n");
       exit(1);
     }else{
-			printf("%s generated!\n",output_filename);
-		}
+      printf("%s generated!\n",output_filename);
+    }
     fclose(fp2);
     snprintf(output_filename,MAXTEXT,"../output/spatial_%s_rel.raw",date);
     for(i=0;i<COL*ROW;i++){
@@ -398,4 +430,98 @@ int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snu
   free(s_input);
   free(s_output);
   return 0;
+}
+
+int VisualizeLUT(short *tmin_input, short **lookup, int MAXLEVEL){
+  FILE *fp;
+  short t_input=TNRANGE;
+  int image=NVALUE,LEVEL=0,i=0;
+  //case A LUT visualization.
+  i=127577;
+  fp=fopen("A_LUT_DBUX.txt","w");
+  while(t_input<=TPRANGE){
+  	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+  		if(LEVEL==0){
+			  if((TNRANGE<=t_input)&&(t_input<=tmin_input[i]+(LEVEL+1)*STEP)){
+					image=lookup[LEVEL][i];
+				}
+			}else if(LEVEL==MAXLEVEL){
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=TPRANGE)){
+					image=lookup[LEVEL][i];
+			  }
+			}else{
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=tmin_input[i]+STEP*(LEVEL+1))){
+					image=lookup[LEVEL][i];
+				}
+			}
+    }
+    fprintf(fp,"%d,%d\n",t_input,image);
+    t_input+=STEP/45.0;
+  }
+  fclose(fp);
+
+  t_input=TNRANGE;
+  i=255041;
+  fp=fopen("B_LUT_DBUX.txt","w");
+  while(t_input<=TPRANGE){
+  	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+  		if(LEVEL==0){
+			  if((TNRANGE<=t_input)&&(t_input<=tmin_input[i]+(LEVEL+1)*STEP)){
+					image=lookup[LEVEL][i];
+				}
+			}else if(LEVEL==MAXLEVEL){
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=TPRANGE)){
+					image=lookup[LEVEL][i];
+			  }
+			}else{
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=tmin_input[i]+STEP*(LEVEL+1))){
+					image=lookup[LEVEL][i];
+				}
+			}
+    }
+    fprintf(fp,"%d,%d\n",t_input,image);
+    t_input+=STEP/45.0;
+  }
+  fclose(fp);
+
+  t_input=TNRANGE;
+  i=275684;
+  fp=fopen("C_LUT_DBUX.txt","w");
+  while(t_input<=TPRANGE){
+  	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+  		if(LEVEL==0){
+			  if((TNRANGE<=t_input)&&(t_input<=tmin_input[i]+(LEVEL+1)*STEP)){
+					image=lookup[LEVEL][i];
+				}
+			}else if(LEVEL==MAXLEVEL){
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=TPRANGE)){
+					image=lookup[LEVEL][i];
+			  }
+			}else{
+				if((tmin_input[i]+STEP*LEVEL<t_input)&&(t_input<=tmin_input[i]+STEP*(LEVEL+1))){
+					image=lookup[LEVEL][i];
+				}
+			}
+    }
+    fprintf(fp,"%d,%d\n",t_input,image);
+    t_input+=STEP/45.0;
+  }
+  fclose(fp);
+
+  return 0;
+}
+
+int StatsCalc(short **t_input, short *tmin_input, short *tmax_input){
+  int count=0,i=0,MAXLEVEL=0,LEVEL=0;
+  for(i=0;i<COL*ROW;i++){
+    tmin_input[i]=TPRANGE;
+    tmax_input[i]=TNRANGE;
+    for(count=0;count<PAIRSIZE;count++){
+      if((tmin_input[i]>t_input[count][i])&&(t_input[count][i]!=NVALUE)) tmin_input[i]=t_input[count][i];
+      if((tmax_input[i]<t_input[count][i])&&(t_input[count][i]!=NVALUE)) tmax_input[i]=t_input[count][i];
+    }
+    LEVEL=(tmax_input[i]-tmin_input[i])/STEP;
+    if(MAXLEVEL<LEVEL) MAXLEVEL=LEVEL;
+  }
+  return MAXLEVEL;
 }
