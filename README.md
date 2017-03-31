@@ -20,14 +20,17 @@ Usage of this program
 
 ### Preparation:
 Before running program, the following preparation is required.  
-A) Edit parameters in "src/define.h".  
-B) Compile program.  
+- Edit parameters in "src/define.h".  
+- Compile program.
+
 	$cd src  
 	$make #require gcc  
-if you revise define.h, please use  
-	$make clean; make
+if you revise define.h, please use
 
-C) put the following input maps and text files under the input directory.  
+	$make clean
+	$make
+
+- Put the following input maps and text files under the input directory.  
 
 	a) temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).  
 		 data format is 2 bytes Integer. filename must be:  
@@ -57,11 +60,11 @@ C) put the following input maps and text files under the input directory.
 			2002003
 			...
 
-Execute:
+### Execute:
+
         $./DBUX
 
-lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory.
-
+lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory.  
 predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_rel.raw"
 
 
