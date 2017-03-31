@@ -20,8 +20,8 @@ Usage of this program
 
 ### Preparation:
 Before running program, the following preparation is required.  
-- Edit parameters in "src/define.h".  
-- Compile program.
+A) Edit parameters in "src/define.h".  
+B) Compile program.
 
 	$cd src  
 	$make #require gcc  
@@ -30,13 +30,13 @@ if you revise define.h, please use
 	$make clean
 	$make
 
-- Put the following input maps and text files under the input directory.  
+C) Put the following input maps and text files under the input directory.  
 
-	a) temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).  
+	- temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).  
 		 data format is 2 bytes Integer. filename must be:  
 		 "spatial_YYYYDOY.raw", "temporal_YYYYDOY.raw"; YYYYDOY is indicated by the following text files.
 
-	b) namelist of S maps which are used for LUT generation - "spatial_pairlist.txt"
+	- namelist of S maps which are used for LUT generation - "spatial_pairlist.txt"
 			e.g.
 			spatial_2002001.raw
 			spatial_2002002.raw
@@ -44,7 +44,7 @@ if you revise define.h, please use
 			spatial_2002007.raw
 			...
 
-	c) namelist of T maps which are used for LUT generation - "temporal_pairlist.txt".  
+	- namelist of T maps which are used for LUT generation - "temporal_pairlist.txt".  
 		 dates and order must be the same as spatial_pairlist.txt.
 			e.g.
 			temporal_2002001.raw
@@ -53,7 +53,7 @@ if you revise define.h, please use
 			temporal_2002007.raw
 			...
 
-	d) list of prediction dates - "predlist.txt"
+	- list of prediction dates - "predlist.txt"
 			e.g.
 			2002001
 			2002002
