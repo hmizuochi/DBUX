@@ -2,23 +2,25 @@ Description (ver. 1.0)
 ======================
 This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C language. It has been tested in Linux system using gcc compiler.
 
-## ver 1.0: original version (first release)
+### ver 1.0: original version (first release)
 
-## License:
+### License:
 This program is provided free of charge, without restriction of use. For the full license information, see "LICENSE.txt". Publications, models and data products that make use of this program must include proper acknowledgement, including citing the journal article as in the following references.
 
-## References:
+### References:
 1. Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sensing. 6(8), pp. 7660-7682.
 2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sensing of Environment. Submitted.
 
 
 Usage of this program
 =====================
-Extract: $ tar zxvf DBUX.tar.gz  
-Sub-directories: src, input, output, sample_data  
+### Extract:
+	$ tar zxvf DBUX.tar.gz  
+	Sub-directories: src, input, output, sample_data  
 
+### Preparation:
 Before running program, the following preparation is required.  
-A) Edit parameters in "src/define.h".
+A) Edit parameters in "src/define.h".  
 B) Compile program.  
 	$cd src  
 	$make #require gcc  
@@ -26,6 +28,7 @@ if you revise define.h, please use
 	$make clean; make
 
 C) put the following input maps and text files under the input directory.  
+
 	a) temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).  
 		 data format is 2 bytes Integer. filename must be:  
 		 "spatial_YYYYDOY.raw", "temporal_YYYYDOY.raw"; YYYYDOY is indicated by the following text files.
