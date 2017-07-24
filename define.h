@@ -10,11 +10,10 @@
 #define MAXTEXT 256 //maximum text buffer. unnecessary to change.
 #define MWSIZE 1 //moving window size for LUT (it must be an odd number). if not apply moving average for LUT, set 1.
 #define STEP 420 //slicing step of LUT. please determine it by uncertainty calculation (See Mizuochi et al., 2017), or by trial and error.
-#define LIMITLEVEL 40 //maximum level of LUT. DBUX can calulate it automatically when '0' was set.
 int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input);
 int ExecDBUX(char *date_listname, short **t_input, short **s_input);
 int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_input, short **lookup_output, short **snum, int MAXLEVEL);
 int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, short **snum_output, int MAXLEVEL);
 int PredDBUX(char *date_listname, short *tmin_input, short **lookup, short **snum, int MAXLEVEL);
 int VisualizeLUT(short *tmin_input, short **lookup, int MAXLEVEL);
-int StatsCalc(short **t_input, short *tmin_input, short *tmax_input);
+int StatsCalc(short **t_input, short *tmin_input, short *tmax_input, short **s_input);

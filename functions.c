@@ -60,7 +60,7 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     exit(1);
   }
   printf("DoStatistics...\n");
-  if(LIMITLEVEL>0){
+  /*if(LIMITLEVEL>0){
     StatsCalc(t_input,tmin_input,tmax_input);
     MAXLEVEL=LIMITLEVEL;
   }else if(LIMITLEVEL==0){
@@ -69,6 +69,8 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     fprintf(stderr,"ExecDBUX: LIMITLEVEL must not be negative value!\n");
     exit(1);
   }
+  */
+  MAXLEVEL=StatsCalc(t_input,tmin_input,tmax_input,s_input);
   printf("StatsCalc: MAXLEVEL=%d\n",MAXLEVEL);
   short *lookup[MAXLEVEL+1], *lookup_ave[MAXLEVEL+1], *snum[MAXLEVEL+1], *snum_ave[MAXLEVEL+1];
 
@@ -158,7 +160,7 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
   }
 
   for(i=0;i<COL*ROW;i++){
-    UPPERLEVEL=(tmax_input[i]-tmin_input[i])/(STEP);
+    UPPERLEVEL=(tmax_input[i]-tmin_input[i])/(STEP); //upperlevel for each pixel
     for(LEVEL=0;LEVEL<=UPPERLEVEL;LEVEL++){
       for(count=0;count<PAIRSIZE;count++){
         s_image[i]=NVALUE;
@@ -516,14 +518,14 @@ int VisualizeLUT(short *tmin_input, short **lookup, int MAXLEVEL){
   return 0;
 }
 
-int StatsCalc(short **t_input, short *tmin_input, short *tmax_input){
+int StatsCalc(short **t_input, short *tmin_input, short *tmax_input, short **s_input){
   int count=0,i=0,MAXLEVEL=0,LEVEL=0;
   for(i=0;i<COL*ROW;i++){
     tmin_input[i]=TPRANGE;
     tmax_input[i]=TNRANGE;
     for(count=0;count<PAIRSIZE;count++){
-      if((tmin_input[i]>t_input[count][i])&&(t_input[count][i]!=NVALUE)) tmin_input[i]=t_input[count][i];
-      if((tmax_input[i]<t_input[count][i])&&(t_input[count][i]!=NVALUE)) tmax_input[i]=t_input[count][i];
+      if((tmin_input[i]>t_input[count][i])&&(t_input[count][i]!=NVALUE)&&(s_input[count][i]!=NVALUE)) tmin_input[i]=t_input[count][i];
+      if((tmax_input[i]<t_input[count][i])&&(t_input[count][i]!=NVALUE)&&(s_input[count][i]!=NVALUE)) tmax_input[i]=t_input[count][i];
     }
     LEVEL=(tmax_input[i]-tmin_input[i])/STEP;
     if(MAXLEVEL<LEVEL) MAXLEVEL=LEVEL;
