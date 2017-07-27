@@ -9,7 +9,7 @@ This program is provided free of charge, without restriction of use. For the ful
 
 ### References:
 1. Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sensing. 6(8), pp. 7660-7682.
-2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sensing of Environment. Submitted.
+2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sensing of Environment. Accepted.
 
 
 Usage of this program
@@ -25,7 +25,7 @@ B) Compile program.
 
 	$cd src  
 	$make #require gcc  
-if you revise define.h, please use
+when you revise define.h, please use
 
 	$make clean
 	$make
@@ -62,7 +62,7 @@ C) Put the following input maps and text files under the input directory.
 
 ### Execute:
 
-        $./DBUX
+        $./DBUX.exe
 
 lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory.  
 predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_rel.raw"
