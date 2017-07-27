@@ -55,7 +55,7 @@ int ReadST(char *s_listname, char *t_listname, short **t_input, short **s_input)
 int ExecDBUX(char *date_listname, short **t_input, short **s_input){
   int i=0,LEVEL=0,MAXLEVEL=0;
   short *tmin_input, *tmax_input;
-  if((tmin_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(tmax_input=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+  if((tmin_input=malloc(COL*ROW*sizeof(short)))==NULL||(tmax_input=malloc(COL*ROW*sizeof(short)))==NULL){
     fprintf(stderr,"ExecDBUX: can't allocate memory\n");
     exit(1);
   }
@@ -72,21 +72,26 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
   */
   MAXLEVEL=StatsCalc(t_input,tmin_input,tmax_input,s_input);
   printf("StatsCalc: MAXLEVEL=%d\n",MAXLEVEL);
-  short *lookup[MAXLEVEL+1], *lookup_ave[MAXLEVEL+1], *snum[MAXLEVEL+1], *snum_ave[MAXLEVEL+1];
-
+  //short *lookup[MAXLEVEL+1], *lookup_ave[MAXLEVEL+1], *snum[MAXLEVEL+1], *snum_ave[MAXLEVEL+1];
+  short **lookup,**lookup_ave,**snum,**snum_ave;
+  lookup=malloc(sizeof(short *)*(MAXLEVEL+1));
+  lookup_ave=malloc(sizeof(short *)*(MAXLEVEL+1));
+  snum=malloc(sizeof(short *)*(MAXLEVEL+1));
+  snum_ave=malloc(sizeof(short *)*(MAXLEVEL+1));
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
-		if((lookup[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(lookup_ave[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||
-    (snum[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(snum_ave[LEVEL]=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+		if((lookup[LEVEL]=malloc(COL*ROW*sizeof(short)))==NULL||(lookup_ave[LEVEL]=malloc(COL*ROW*sizeof(short)))==NULL||(snum[LEVEL]=malloc(COL*ROW*sizeof(short)))==NULL||(snum_ave[LEVEL]=malloc(COL*ROW*sizeof(short)))==NULL){
 			fprintf(stderr,"ExecDBUX: can't allocate memory\n");
       exit(1);
-		}
+    }
+  }
+  for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
     for(i=0;i<COL*ROW;i++){
       lookup[LEVEL][i]=0;
       lookup_ave[LEVEL][i]=0;
-			snum[LEVEL][i]=0;
+      snum[LEVEL][i]=0;
       snum_ave[LEVEL][i]=0;
     }
-	}
+  }
   printf("LUT generating...\n");
   if(GenLUT(tmin_input, tmax_input, t_input, s_input, lookup, snum, MAXLEVEL)!=0){
     fprintf(stderr,"ExecDBUX: GenLUT error!\n");
@@ -134,66 +139,80 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
   }
   free(tmin_input);
   free(tmax_input);
+  free(lookup);
+  free(lookup_ave);
+  free(snum);
+  free(snum_ave);
   return 0;
 }
 
 int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_input, short **lookup_output, short **snum, int MAXLEVEL){
   short *s_image;
-  int *lookup[MAXLEVEL+1];
+  //int *lookup[MAXLEVEL+1];
+  int **lookup;
   int LEVEL=0,count=0,i=0,UPPERLEVEL=0;
   char lookup_output_filename[256];
   FILE *fp;
+  printf("test1");
+  lookup=malloc(sizeof(int *)*(MAXLEVEL+1));
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
-		if((lookup[LEVEL]=(int*)malloc(COL*ROW*sizeof(int)))==NULL){
-			fprintf(stderr,"GenLUT: can't allocate memory\n");
+    if((lookup[LEVEL]=malloc(COL*ROW*sizeof(int)))==NULL){
+      fprintf(stderr,"GenLUT: can't allocate memory\n");
       exit(1);
-		}
-	}
-  if((s_image=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+    }
+  }
+  printf("test2");
+  if((s_image=malloc(COL*ROW*sizeof(short)))==NULL){
     fprintf(stderr,"GenLUT: can't allocate memory\n");
     exit(1);
   }
-  for(i=0;i<COL*ROW;i++){
-    for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+  for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+    for(i=0;i<ROW*COL;i++){
     	lookup[LEVEL][i]=0;
-	  }
-  }
-
-  for(i=0;i<COL*ROW;i++){
-    UPPERLEVEL=(tmax_input[i]-tmin_input[i])/(STEP); //upperlevel for each pixel
-    for(LEVEL=0;LEVEL<=UPPERLEVEL;LEVEL++){
-      for(count=0;count<PAIRSIZE;count++){
-        s_image[i]=NVALUE;
-        if(LEVEL==0){
-          if((TNRANGE<=t_input[count][i])&&(t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP)){
-            s_image[i]=s_input[count][i];
-          }else{
-            s_image[i]=NVALUE;
-          }
-        }else if(LEVEL==UPPERLEVEL){
-          if((tmin_input[i]+LEVEL*STEP<t_input[count][i])&&(t_input[count][i]<=TPRANGE)){
-            s_image[i]=s_input[count][i];
-          }else{
-            s_image[i]=NVALUE;
-          }
-        }else{
-          if(tmin_input[i]+LEVEL*STEP<t_input[count][i]&&t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP){
-            s_image[i]=s_input[count][i];
-          }else{
-            s_image[i]=NVALUE;
-          }
-        }
-        if(SNRANGE<=s_image[i]&&s_image[i]<=SPRANGE){
-          snum[LEVEL][i]+=1;
-        }else{
-          s_image[i]=0;
-        }
-        lookup[LEVEL][i]=lookup[LEVEL][i]+s_image[i];
-      }
     }
-    for(LEVEL=UPPERLEVEL+1;LEVEL<=MAXLEVEL;LEVEL++){
-      lookup[LEVEL][i]=lookup[UPPERLEVEL][i];
-      snum[LEVEL][i]=snum[UPPERLEVEL][i];
+  }
+  printf("test3");
+  for(i=0;i<COL*ROW;i++){
+    if(tmax_input[i]==NVALUE||tmin_input[i]==NVALUE){
+	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
+		snum[LEVEL][i]=0;
+	}
+    }else{
+	UPPERLEVEL=(tmax_input[i]-tmin_input[i])/(STEP); //upperlevel for each pixel
+	for(LEVEL=0;LEVEL<=UPPERLEVEL;LEVEL++){
+		for(count=0;count<PAIRSIZE;count++){
+        		s_image[i]=NVALUE;
+		        if(LEVEL==0){
+				if((TNRANGE<=t_input[count][i])&&(t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP)){
+			        	s_image[i]=s_input[count][i];
+			        }else{
+            				s_image[i]=NVALUE;
+          			}
+        		}else if(LEVEL==UPPERLEVEL){
+          			if((tmin_input[i]+LEVEL*STEP<t_input[count][i])&&(t_input[count][i]<=TPRANGE)){
+            				s_image[i]=s_input[count][i];
+          			}else{
+            				s_image[i]=NVALUE;
+          			}
+        		}else{
+          			if(tmin_input[i]+LEVEL*STEP<t_input[count][i]&&t_input[count][i]<=tmin_input[i]+(LEVEL+1)*STEP){
+            				s_image[i]=s_input[count][i];
+          			}else{
+            				s_image[i]=NVALUE;
+         	 		}
+        		}
+        		if(SNRANGE<=s_image[i]&&s_image[i]<=SPRANGE){
+          			snum[LEVEL][i]+=1;
+        		}else{
+          			s_image[i]=0;
+        		}
+       			lookup[LEVEL][i]=lookup[LEVEL][i]+s_image[i];
+      		}
+    	}
+    	for(LEVEL=UPPERLEVEL+1;LEVEL<=MAXLEVEL;LEVEL++){
+      		lookup[LEVEL][i]=lookup[UPPERLEVEL][i];
+      		snum[LEVEL][i]=snum[UPPERLEVEL][i];
+    	}
     }
   }
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
@@ -235,6 +254,7 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
     free(lookup[LEVEL]);
   }
   free(s_image);
+  free(lookup);
   return 0;
 }
 
@@ -527,8 +547,13 @@ int StatsCalc(short **t_input, short *tmin_input, short *tmax_input, short **s_i
       if((tmin_input[i]>t_input[count][i])&&(t_input[count][i]!=NVALUE)&&(s_input[count][i]!=NVALUE)) tmin_input[i]=t_input[count][i];
       if((tmax_input[i]<t_input[count][i])&&(t_input[count][i]!=NVALUE)&&(s_input[count][i]!=NVALUE)) tmax_input[i]=t_input[count][i];
     }
-    LEVEL=(tmax_input[i]-tmin_input[i])/STEP;
-    if(MAXLEVEL<LEVEL) MAXLEVEL=LEVEL;
+    if(tmin_input[i]>tmax_input[i]){
+	tmin_input[i]=NVALUE;
+	tmax_input[i]=NVALUE;
+    }else{
+    	LEVEL=(tmax_input[i]-tmin_input[i])/STEP;
+    	if(MAXLEVEL<LEVEL) MAXLEVEL=LEVEL;
+    }
   }
   return MAXLEVEL;
 }

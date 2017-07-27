@@ -13,19 +13,27 @@ int main(int argc, char *argv[]){
 	printf("+---------------------------------------------------------+\n");
 
 	/*variable definition and memory allocation*/
-  int count=0;
+        int count=0,i=0;
 	char pred_listname[]="../input/predlist.txt";
 	char s_listname[]="../input/spatial_pairlist.txt";
 	char t_listname[]="../input/temporal_pairlist.txt";
-	short *t_pair[PAIRSIZE],*s_pair[PAIRSIZE];
-
+	//short *t_pair[PAIRSIZE],*s_pair[PAIRSIZE];
+	short **t_pair,**s_pair;
+	t_pair=malloc(sizeof(short *)*PAIRSIZE);
+	s_pair=malloc(sizeof(short *)*PAIRSIZE);
 	for(count=0;count<PAIRSIZE;count++){
-		if((t_pair[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL||(s_pair[count]=(short*)malloc(COL*ROW*sizeof(short)))==NULL){
+		if((t_pair[count]=malloc(COL*ROW*sizeof(short)))==NULL||(s_pair[count]=malloc(COL*ROW*sizeof(short)))==NULL){
 			fprintf(stderr,"main: can't allocate memory\n");
 			exit(1);
 		}
 	}
-
+	//*initialization
+	for(count=0;count<PAIRSIZE;count++){
+		for(i=0;i<ROW*COL;i++){
+			t_pair[count][i]=0;
+			s_pair[count][i]=0;
+		}
+	}
 	/*initial check for parameters*/
 	if(TPRANGE<TNRANGE){
 		fprintf(stderr,"main: TPRANGE must be greater than TNRANGE\n");
