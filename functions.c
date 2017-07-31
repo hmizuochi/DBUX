@@ -153,7 +153,6 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
   int LEVEL=0,count=0,i=0,UPPERLEVEL=0;
   char lookup_output_filename[256];
   FILE *fp;
-  printf("test1");
   lookup=malloc(sizeof(int *)*(MAXLEVEL+1));
   for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
     if((lookup[LEVEL]=malloc(COL*ROW*sizeof(int)))==NULL){
@@ -161,7 +160,6 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
       exit(1);
     }
   }
-  printf("test2");
   if((s_image=malloc(COL*ROW*sizeof(short)))==NULL){
     fprintf(stderr,"GenLUT: can't allocate memory\n");
     exit(1);
@@ -171,7 +169,6 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
     	lookup[LEVEL][i]=0;
     }
   }
-  printf("test3");
   for(i=0;i<COL*ROW;i++){
     if(tmax_input[i]==NVALUE||tmin_input[i]==NVALUE){
 	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
