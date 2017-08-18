@@ -9,7 +9,7 @@ This program is provided free of charge, without restriction of use. For the ful
 
 ### References:
 1. Mizuochi, H., Hiyama, T., Ohta, T., Nasahara, K. N. (2014): Evaluation of the surface water distribution in north-central Namibia based on MODIS and AMSR series. Remote Sensing. 6(8), pp. 7660-7682.
-2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of lookup-table-based approach of data fusion for seasonal wetlands monitoring: Integrated use of AMSR series, MODIS and Landsat. Remote Sensing of Environment. Accepted.
+2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of a lookup-table-based approach to data fusion for seasonal wetlands monitoring: An integrated use of AMSR series, MODIS, and Landsat. Remote Sensing of Environment. 199c, pp. 370-388.
 
 
 Usage of this program
