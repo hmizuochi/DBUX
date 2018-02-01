@@ -98,10 +98,19 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     exit(1);
   } //input:tmin_input,t_input,s_input    output:lookup,snum    generate lookup maps.
 
-  //if you use moving average of LUT, please remove the comment out "CO".
-  //CO
   if(MWSIZE==1){
     printf("LUT generated! No moving average.\n");
+    //if you dont want to gapfill LUT, comment out from here to CO
+    printf("LUT gapfilling by lower LUT.\n");
+    for(LEVEL=1;LEVEL<=MAXLEVEL;LEVEL++){
+      for(i=0;i<COL*ROW;i++){
+        if(lookup[LEVEL][i]==NVALUE){
+          lookup[LEVEL][i]=lookup[LEVEL-1][i];
+          snum[LEVEL][i]=snum[LEVEL-1][i];
+        }
+      }
+    }
+    //CO
     printf("do prediction...\n");
     if(PredDBUX(date_listname, tmin_input, lookup, snum, MAXLEVEL)!=0){
       fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
@@ -116,6 +125,17 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
       fprintf(stderr,"ExecDBUX: AveLUT error!\n");
       exit(1);
     } //input:lookup,snum   output:lookup_ave,snum_ave    generate averaged lookup maps.
+    //if you dont want to gapfill LUT, comment out from here to CO
+    printf("LUT gapfilling by lower LUT.\n");
+    for(LEVEL=1;LEVEL<=MAXLEVEL;LEVEL++){
+      for(i=0;i<COL*ROW;i++){
+        if(lookup_ave[LEVEL][i]==NVALUE){
+          lookup_ave[LEVEL][i]=lookup_ave[LEVEL-1][i];
+          snum_ave[LEVEL][i]=snum_ave[LEVEL-1][i];
+        }
+      }
+    }
+    //CO
     printf("do prediction...\n");
     if(PredDBUX(date_listname, tmin_input, lookup_ave, snum_ave, MAXLEVEL)!=0){
       fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
