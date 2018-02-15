@@ -72,6 +72,6 @@ predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_r
 Sample data
 ===========
 
-sample_data directory includes 9 Smaps and 366 Tmaps (i.e. 9 match-up pairs are available, and 366 prediction can be executable) over seasonal wetlands in north-central Namibia.
+sample_data directory includes 9 Smaps and 366 Tmaps (i.e. 9 match-up pairs are available, and 366 prediction can be executable) over seasonal wetlands in north-central Namibia. (upper-left 17:27S,15:21E; lower-right 17:30S,15:24E; resolution 1 arcsec)
 Smap is modified normalized water index (MNDWI) derived from Landsat TM and ETM+, and Tmap is that derived from MODIS, with scalefactor = 10000.
 For accurate prediction, more match-up pairs are desirable.
