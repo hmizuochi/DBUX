@@ -1,9 +1,9 @@
-Description (ver. 1.0)
+Description
 =======================
 This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C and python languages. They have been tested in Linux system (for C, using gcc compiler).
 
 ### Revision History:
-First release on 2017/03/01: original version (first release)  
+First release on 2017/03/01: original version (Mizuochi et al., 2014)
 revised on 2018/02/01: LUT gap-filling implemented  
 revised on 2018/05/01: add python version, which includes spatial-smoothing and uncertainty estimation
 
@@ -55,7 +55,16 @@ A) Put the following input maps and text files under the input directory.
                         ...
 
 
-B) Give the following parameters.
+B) Give parameters.
+##### C program
+Edit the following parameters in "src/define.h", and compile the program:
+        $cd src
+        $make clean
+        $make #require gcc
+please do this every time when you revise "src/define.h".
+
+###### python program
+Give the parameters as arguments when you run the program.
 
 	NVALUE //null value. must NOT be between TNRANGE and TPRANGE, nor SNRANGE and SPRANGE.  
 	TPRANGE //potentially maximum value of temporally frequent maps ("T maps").  
@@ -70,15 +79,6 @@ B) Give the following parameters.
 	STEP //slicing step of LUT. please determine it by uncertainty calculation (See Mizuochi et al., 2017), or by trial and error.
 	MAP_MWSIZE //moving window size for spatial smoothing (it must be an odd number). it can be used only with python program.
 
-##### C program
-Edit above parameters in "src/define.h", and compile the program:
-	$cd src
-	$make clean
-	$make #require gcc
-please do this every time when you revise "src/define.h".
-
-###### python program
-Give the parameters as arguments when run the program.
 
 ### Execute:
 ###### C program
