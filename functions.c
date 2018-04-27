@@ -98,7 +98,7 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
     exit(1);
   } //input:tmin_input,t_input,s_input    output:lookup,snum    generate lookup maps.
 
-  if(MWSIZE==1){
+  if(LUT_MWSIZE==1){
     printf("LUT generated! No moving average.\n");
     //if you dont want to gapfill LUT, comment out from here to CO
     printf("LUT gapfilling by lower LUT.\n");
@@ -116,11 +116,11 @@ int ExecDBUX(char *date_listname, short **t_input, short **s_input){
       fprintf(stderr,"ExecDBUX: PredDBUX error!\n");
       exit(1);
     }
-  }else if(MWSIZE%2==0){
-    fprintf(stderr,"ExecDBUX: MWSIZE must be an odd number. \n");
+  }else if(LUT_MWSIZE%2==0){
+    fprintf(stderr,"ExecDBUX: LUT_MWSIZE must be an odd number. \n");
     exit(1);
   }else{
-    printf("LUT generated! applying moving average with size %d...\n",MWSIZE);
+    printf("LUT generated! applying moving average with size %d...\n",LUT_MWSIZE);
     if(AveLUT(lookup, snum, lookup_ave, snum_ave, MAXLEVEL)!=0){
       fprintf(stderr,"ExecDBUX: AveLUT error!\n");
       exit(1);
@@ -256,7 +256,7 @@ int GenLUT(short *tmin_input, short *tmax_input, short **t_input, short **s_inpu
       exit(1);
     }
     fclose(fp);
-    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d_rel.bin",LEVEL);
+    snprintf(lookup_output_filename,MAXTEXT,"../output/LOOKUP%d_rel.raw",LEVEL);
     if((fp=fopen(lookup_output_filename,"wb"))==NULL){
       fprintf(stderr,"GenLUT: can't open output file\n");
       exit(1);
@@ -296,21 +296,21 @@ int AveLUT(short **lookup_input, short **snum_input, short **lookup_output, shor
 
 	for(LEVEL=0;LEVEL<=MAXLEVEL;LEVEL++){
 	   for(i=0;i<ROW*COL;i++){
-	      if((int)MWSIZE/2<=LEVEL&&LEVEL<=MAXLEVEL-(int)MWSIZE/2){
+	      if((int)LUT_MWSIZE/2<=LEVEL&&LEVEL<=MAXLEVEL-(int)LUT_MWSIZE/2){
           count=0;
-          for(m=0;m<MWSIZE;m++){
-            if(lookup_input[LEVEL+(int)(m-MWSIZE/2)][i]<=SNRANGE||SPRANGE<=lookup_input[LEVEL+(int)(m-MWSIZE/2)][i]){
+          for(m=0;m<LUT_MWSIZE;m++){
+            if(lookup_input[LEVEL+(int)(m-LUT_MWSIZE/2)][i]<=SNRANGE||SPRANGE<=lookup_input[LEVEL+(int)(m-LUT_MWSIZE/2)][i]){
               count+=1;
             }else{
-				      lookup[LEVEL][i]+=lookup_input[LEVEL+(int)(m-MWSIZE/2)][i];
-              snum_output[LEVEL][i]+=snum_input[LEVEL+(int)(m-MWSIZE/2)][i];
+				      lookup[LEVEL][i]+=lookup_input[LEVEL+(int)(m-LUT_MWSIZE/2)][i];
+              snum_output[LEVEL][i]+=snum_input[LEVEL+(int)(m-LUT_MWSIZE/2)][i];
 				    }
           }
-          if(count==MWSIZE){
+          if(count==LUT_MWSIZE){
             lookup[LEVEL][i]=NVALUE;
 					  snum_output[LEVEL][i]=0;
           }else{
-            lookup[LEVEL][i]=lookup[LEVEL][i]/(MWSIZE-count);
+            lookup[LEVEL][i]=lookup[LEVEL][i]/(LUT_MWSIZE-count);
           }
         }else{
 				  lookup[LEVEL][i]=lookup_input[LEVEL][i];
