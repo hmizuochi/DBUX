@@ -2,11 +2,11 @@ Description (ver. 1.0)
 ======================
 This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C and python languages. They have been tested in Linux system (for C, using gcc compiler).  
 
-----------------------
+###Revision History:
 ver 1.0: original version (first release)  
 revised on 2018/02/01: LUT gap-filling implemented  
 revised on 2018/05/01: add python version, which includes spatial-smoothing and uncertainty estimation
-----------------------
+
 
 ### License:
 This program is provided free of charge, without restriction of use. For the full license information, see "LICENSE.txt". Publications, models and data products that make use of this program must include proper acknowledgement, including citing the journal article as in the following references.
@@ -16,7 +16,7 @@ This program is provided free of charge, without restriction of use. For the ful
 2. Mizuochi, H., Hiyama, T., Ohta, T., Fujioka, Y., Kambatuku, J. R., Iijima, M., Nasahara, K. N. (2017): Development and evaluation of a lookup-table-based approach to data fusion for seasonal wetlands monitoring: An integrated use of AMSR series, MODIS, and Landsat. Remote Sensing of Environment. 199c, pp. 370-388.
 
 
-How to use
+How to Use
 =====================
 ### Extract:
 	$ tar zxvf DBUX.tar.gz  
@@ -55,18 +55,18 @@ A) Put the following input maps and text files under the input directory.
                         ...
 
 B) Give the following parameters.
-    NVALUE //null value. must NOT be between TNRANGE and TPRANGE, nor SNRANGE and SPRANGE.  
-    TPRANGE //potentially maximum value of temporally frequent maps ("T maps").  
-    TNRANGE //potentially minimum value of temporally frequent maps.  
-    SPRANGE //potentially maximum value of spatially fine maps ("S maps").
-    SNRANGE //potentially minumum value of spatially fine maps.
-    PAIRSIZE //the number of match-up pairs.
-    PREDSIZE //the number of dates in which DBUX will make prediction.
-    COL //columns of a map. it must be common between T maps and S maps.
-    ROW //rows of a map. it must be common between T maps and S maps.
-    LUT_MWSIZE //moving window size for LUT (it must be an odd number). if not apply moving average for LUT, set 1.
-    STEP //slicing step of LUT. please determine it by uncertainty calculation (See Mizuochi et al., 2017), or by trial and error.
-    MAP_MWSIZE //moving window size for spatial smoothing (it must be an odd number). it can be used only with python program.
+	NVALUE //null value. must NOT be between TNRANGE and TPRANGE, nor SNRANGE and SPRANGE.  
+	TPRANGE //potentially maximum value of temporally frequent maps ("T maps").  
+	TNRANGE //potentially minimum value of temporally frequent maps.  
+	SPRANGE //potentially maximum value of spatially fine maps ("S maps").
+	SNRANGE //potentially minumum value of spatially fine maps.
+	PAIRSIZE //the number of match-up pairs.
+	PREDSIZE //the number of dates in which DBUX will make prediction.
+	COL //columns of a map. it must be common between T maps and S maps.
+	ROW //rows of a map. it must be common between T maps and S maps.
+	LUT_MWSIZE //moving window size for LUT (it must be an odd number). if not apply moving average for LUT, set 1.
+	STEP //slicing step of LUT. please determine it by uncertainty calculation (See Mizuochi et al., 2017), or by trial and error.
+	MAP_MWSIZE //moving window size for spatial smoothing (it must be an odd number). it can be used only with python program.
 
 ####C program
 Edit above parameters in "src/define.h", and compile the program:
