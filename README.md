@@ -24,7 +24,7 @@ How to Use
 
 ### Preparation:
 Before running program, the following preparation is required.  
-A) Put the following input maps and text files under the input directory.
+##### A) Put the following input maps and text files under the input directory.
 
         - temporally frequent maps ("T maps" hereafter) and spatially fine maps ("S maps" hereafter).
                  data format is 2 bytes Integer. filename must be:
@@ -55,15 +55,16 @@ A) Put the following input maps and text files under the input directory.
                         ...
 
 
-B) Give parameters.
-##### C program
+##### B) Give parameters.
+*C program*
 Edit the following parameters in "src/define.h", and compile the program:
+
         $cd src
         $make clean
         $make #require gcc
 please do this every time when you revise "src/define.h".
 
-###### python program
+*python program*
 Give the parameters as arguments when you run the program.
 
 	NVALUE //null value. must NOT be between TNRANGE and TPRANGE, nor SNRANGE and SPRANGE.  
@@ -81,10 +82,12 @@ Give the parameters as arguments when you run the program.
 
 
 ### Execute:
-###### C program
+*C program*
+
         $./DBUX.exe
 
-###### python program
+*python program*
+
 	$python 20180424_DBUX.py NVALUE TPRANGE TNRANGE SPRANGE SNRANGE PAIRSIZE PREDSIZE COL ROW LUT_MWSIZE STEP MAP_MWSIZE
 
 lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory. if you use python program, uncertainty maps, which indicate uncertainty of the prediction for each pixel, are also created.  
