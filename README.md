@@ -56,7 +56,7 @@ Before running program, the following preparation is required.
 
 
 ##### B) Give parameters.
-*C program*
+*C program*  
 Edit the following parameters in "src/define.h", and compile the program:
 
         $cd src
@@ -64,7 +64,7 @@ Edit the following parameters in "src/define.h", and compile the program:
         $make #require gcc
 please do this every time when you revise "src/define.h".
 
-*python program*
+*python program*  
 Give the parameters as arguments when you run the program.
 
 	NVALUE //null value. must NOT be between TNRANGE and TPRANGE, nor SNRANGE and SPRANGE.  
