@@ -57,7 +57,7 @@ Before running program, the following preparation is required.
 
 ##### B) Give parameters.
 *C program*  
-Edit the following parameters in "src/define.h", and compile the program:
+Edit the parameters in "src/define.h", and compile the program:
 
         $cd src
         $make clean
