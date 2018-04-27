@@ -1,4 +1,4 @@
-#Description (ver. 1.0)
+Description (ver. 1.0)
 -----------------------
 This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C and python languages. They have been tested in Linux system (for C, using gcc compiler).  
 
