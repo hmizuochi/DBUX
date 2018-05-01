@@ -1,6 +1,6 @@
 Description
 =======================
-This is a stable program of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C and python languages. They have been tested in Linux system (for C, using gcc compiler).
+These are stable programs of Database Unmixing (Mizuochi et al., 2014), which is LUT-based data fusion algorithm, written in C and python languages. They have been tested in Linux system (for C, using gcc compiler).
 
 ### Revision History:
 First release on 2017/03/01: original version (Mizuochi et al., 2014)  
@@ -90,7 +90,7 @@ Give the parameters as arguments when you run the program.
 
 	$python 20180424_DBUX.py NVALUE TPRANGE TNRANGE SPRANGE SNRANGE PAIRSIZE PREDSIZE COL ROW LUT_MWSIZE STEP MAP_MWSIZE
 
-lookup maps, reliability maps (See Mizuochi et al., 2017), predicted maps will be generated under output directory. if you use python program, uncertainty maps, which indicate uncertainty of the prediction for each pixel, are also created.  
+lookup maps, reliability maps (they indicate the sample size with which DBUX made prediction for each pixel; see Mizuochi et al., 2017), predicted (i.e. gap-filled) maps will be generated under output directory. if you use python program, uncertainty maps, which indicate uncertainty (standard error) of the prediction for each pixel, will also be created.  
 predicted maps: "spatial_YYYYDOY_comp.raw", reliability maps: "spatial_YYYYDOY_rel.raw", uncertainty maps: "spatial_YYYYDOY_uncertainty.raw"
 
 
